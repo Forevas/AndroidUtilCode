@@ -1,69 +1,66 @@
 package com.blankj.utilcode.util;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.blankj.utilcode.util.TestUtils.BASEPATH;
-import static com.blankj.utilcode.util.TestUtils.SEP;
-import static com.blankj.utilcode.util.ZipUtils.*;
-import static com.google.common.truth.Truth.*;
+import static com.blankj.utilcode.util.TestConfig.PATH_TEMP;
+import static com.blankj.utilcode.util.TestConfig.PATH_ZIP;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * <pre>
  *     author: Blankj
  *     blog  : http://blankj.com
- *     time  : 2016/9/10
- *     desc  : ZipUtils单元测试
+ *     time  : 2016/09/10
+ *     desc  : ZipUtils 单元测试
  * </pre>
  */
 public class ZipUtilsTest {
 
-    String testZip = BASEPATH + "zip" + SEP + "testZip" + SEP;
-    String testZipFiles = BASEPATH + "zip" + SEP + "testZips.zip";
-    String testZipFile = BASEPATH + "zip" + SEP + "testZip.zip";
-    String unzipFile = BASEPATH + "zip" + SEP + "testUnzip";
+    private String zipFile  = PATH_TEMP + "zipFile.zip";
+    private String zipFiles = PATH_TEMP + "zipFiles.zip";
 
-    @Test
-    public void testZipFiles() throws Exception {
-        List<File> files = FileUtils.listFilesInDir(testZip, false);
-        FileUtils.createOrExistsFile(testZipFiles);
-        zipFiles(files, testZipFiles);
+    @Before
+    public void setUp() throws Exception {
+        FileUtils.createOrExistsDir(PATH_TEMP);
+        assertTrue(ZipUtils.zipFile(PATH_ZIP, zipFile, "测试zip"));
     }
 
     @Test
-    public void testZipFile() throws Exception {
-        zipFile(testZip, testZipFile, "测试zip");
+    public void zipFiles() throws Exception {
+        List<String> files = new ArrayList<>();
+        files.add(PATH_ZIP + "test.txt");
+        files.add(PATH_ZIP);
+        files.add(PATH_ZIP + "testDir");
+        assertTrue(ZipUtils.zipFiles(files, zipFiles));
     }
 
     @Test
-    public void testUpZipFile() throws Exception {
-        assertThat(unzipFile(testZipFile, unzipFile)).isTrue();
-        assertThat(unzipFile(testZipFiles, unzipFile)).isTrue();
+    public void unzipFile() throws Exception {
+        System.out.println(ZipUtils.unzipFile(zipFile, PATH_TEMP));
     }
 
     @Test
-    public void testUpZipFiles() throws Exception {
-        List<File> files = new ArrayList<>();
-        files.add(new File(testZipFile));
-        files.add(new File(testZipFiles));
-        assertThat(unzipFiles(files, unzipFile)).isTrue();
+    public void unzipFileByKeyword() throws Exception {
+        System.out.println((ZipUtils.unzipFileByKeyword(zipFile, PATH_TEMP, null)).toString());
     }
 
     @Test
-    public void testUnzipFileByKeyword() throws Exception {
-        System.out.println((unzipFileByKeyword(testZipFile, unzipFile, ".txt")).toString());
+    public void getFilesPath() throws Exception {
+        System.out.println(ZipUtils.getFilesPath(zipFile));
     }
 
     @Test
-    public void testGetFileNamesInZip() throws Exception {
-        System.out.println(getFilesPath(testZipFile));
+    public void getComments() throws Exception {
+        System.out.println(ZipUtils.getComments(zipFile));
     }
 
-    @Test
-    public void testGetComments() throws Exception {
-        System.out.println(getComments(testZipFile));
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteAllInDir(PATH_TEMP);
     }
 }

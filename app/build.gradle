@@ -1,43 +1,73 @@
+plugins {
+    id "tech.harmonysoft.oss.traute" version '1.0.5'
+}
 apply plugin: 'com.android.application'
 
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+File signPropertiesFile = rootProject.file('sign/keystore.properties')
 
+android {
+    compileSdkVersion compile_sdk_version
     defaultConfig {
         applicationId "com.blankj.androidutilcode"
-        minSdkVersion 16
-        targetSdkVersion 16
-        versionCode 20
-        versionName "1.4.0"
+        minSdkVersion min_sdk_version
+        targetSdkVersion target_sdk_version
+        versionCode version_code
+        versionName version_name
+    }
+
+    if (signPropertiesFile.exists()) {
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(signPropertiesFile))
+        signingConfigs {
+            release {
+                storeFile rootProject.file(properties['keystore'])
+                storePassword properties['storePassword']
+                keyAlias properties['keyAlias']
+                keyPassword properties['keyPassword']
+            }
+        }
     }
 
     buildTypes {
-        debug {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (signPropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
         }
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs('src/main/res', 'src/main/res_core', 'src/main/res_sub')
+        }
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
+traute {
+    javacPluginVersion = trauteVersion
+}
+
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    final SUPPORT_VERSION = '25.3.1'
-    final LEAKCANARY_VERSION = '1.5';
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':utilcode')
+    implementation project(':subutil')
 
-    def leakCanary = "com.squareup.leakcanary:leakcanary-android-no-op:$LEAKCANARY_VERSION"
+    implementation "com.android.support:appcompat-v7:$support_version"
+    implementation "com.android.support:design:$support_version"
 
-    compile project(':utilcode')
-    compile "com.android.support:appcompat-v7:$SUPPORT_VERSION"
-    compile "com.android.support:support-v4:$SUPPORT_VERSION"
-    compile "com.android.support:design:$SUPPORT_VERSION"
+    implementation 'com.r0adkll:slidableactivity:2.0.5'
 
     // LeakCanary
-    debugCompile "com.squareup.leakcanary:leakcanary-android:$LEAKCANARY_VERSION"
-    releaseCompile leakCanary
-    testCompile leakCanary
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakcanary_version"
+
+//    implementation 'com.blankj:utilcode:1.12.0'
 }
+
+
